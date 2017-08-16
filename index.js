@@ -24,43 +24,8 @@ const images = [
   return image;
 });
 
-const list = [
-  {
-    id: 0,
-    value: images[0],
-    next: 1,
-    prev: 2
-  },
-  {
-    id: 1,
-    value: images[1],
-    next: 2,
-    prev: 0
-  },
-  {
-    id: 2,
-    value: images[2],
-    next: 0,
-    prev: 1
-  },
-]
-
 const rowsCount = 50;
 const colsCount = 100;
-
-
-const randTrueFalse = () => (Math.random() > 0.5);
-
-const grid = [];
-const shufleGrid = () => {
-  for (let i = 0; i < rowsCount; i += 1) {
-    grid[i] = grid[i] ? grid[i] : [];
-    for (let j = 0; j < colsCount; j += 1) {
-      grid[i][j] = randTrueFalse();
-    }
-  }
-};
-
 
 const dx = width / colsCount;
 const dy = height / rowsCount;
@@ -71,10 +36,42 @@ const k = {
   pos: 0
 };
 
+
+let currentImageIndex = 0;
+let nextImageIndex = 1;
+
+const forwardImage = (time) => {
+  tl.to(k, time, {
+    pos: 2,
+    onComplete: () => {
+      currentImageIndex = nextImageIndex;
+      nextImageIndex += 1;
+      if (nextImageIndex === images.length) nextImageIndex = 0;
+      k.pos = 0;
+    }
+  });
+};
+
+const backwardImage = (time) => {
+  tl.to(k, time, {
+    pos: 0,
+    onComplete: () => {
+      nextImageIndex = currentImageIndex;
+      currentImageIndex -= 1;
+      if (currentImageIndex === -1) currentImageIndex = images.length - 1;
+      k.pos = 2;
+    }
+  });
+};
+
+let previousSide = 'right';
 document.addEventListener('click', (e) => {
   const side = e.clientX < width / 2 ? 'left' : 'right';
-  if (side === 'right') forwardImage();
-  if (side === 'left') backwardImage();
+  const changeImage = side === 'left' ? backwardImage : forwardImage;
+  // it fix needs of double click for changing direction
+  if (side !== previousSide) changeImage(0);
+  changeImage(1);
+  previousSide = side;
 });
 
 const fromRange = (a, b, val) => {
@@ -83,37 +80,6 @@ const fromRange = (a, b, val) => {
   return val;
 };
 
-shufleGrid();
-let prevImage = list[2];
-let currentImage = list[0];
-let nextImage = list[1];
-
-let currentImageIndex = 0;
-let nextImageIndex = 1;
-
-const forwardImage = () => {
-  tl.to(k, 1, {
-    pos: 2,
-    onComplete: () => {
-      currentImageIndex = nextImageIndex;
-      nextImageIndex = nextImageIndex + 1;
-      if (nextImageIndex === images.length) nextImageIndex = 0;
-      k.pos = 0;
-    }
-  });
-};
-
-const backwardImage = () => {
-  tl.to(k, 1, {
-    pos: 0,
-    onComplete: () => {
-      nextImageIndex = currentImageIndex;
-      currentImageIndex = currentImageIndex - 1;
-      if (currentImageIndex === -1) currentImageIndex = images.length - 1;
-      k.pos = 2;
-    }
-  });
-};
 
 const updateMainCanvas = () => {
   mainCtx.clearRect(0, 0, width, height);
