@@ -52,8 +52,9 @@ const forwardImage = (time) => {
   });
 };
 
+
 const backwardImage = (time) => {
-  tl.to(k, time, {
+  tl.to(k, time * 1.4, { // Without factor this animation is faster
     pos: 0,
     onComplete: () => {
       nextImageIndex = currentImageIndex;
@@ -82,7 +83,6 @@ const fromRange = (a, b, val) => {
 
 
 const updateMainCanvas = () => {
-  mainCtx.clearRect(0, 0, width, height);
   mainCtx.drawImage(images[currentImageIndex], 0, 0, width, height);
   for (let i = 0; i < rowsCount; i += 1) {
     for (let j = 0; j < colsCount; j += 1) {
